@@ -7,6 +7,7 @@
 
 (struct State (money anim) #:transparent)
 
+;generate file
 (define file-exists (file-exists? "Kapital"))
 (if (not file-exists)
         (write-file "Kapital" "0")
@@ -17,6 +18,7 @@
 (define BACKGROUND (bitmap "background.png"))
 (define (savegame p) (write-file "Kapital" (number->string p)))
 
+;define trump animation
 (define trump1 (bitmap "trump1.png"))
 (define trump2 (bitmap "trump2.png"))
 (define trump3 (bitmap "trump3.png"))
@@ -38,19 +40,20 @@
   (define bb (+ bt bh))
   (and (> br al) (< bl ar) (> bb at) (< bt ab)))
 
-
+;define draw trump
 (define (draw_trump p)
     (define current (State-anim p))
     (cond
         ((= current 0)
-            (place-images (list trump1) posns BACKGROUND))
+            trump1)
         ((= current 1)
-            (place-images (list trump2) posns BACKGROUND))
+            trump2)
         ((= current 2) 
-            (place-images (list trump3) posns BACKGROUND))
+            trump3)
         ((= current 3) 
-            (place-images (list trump2) posns BACKGROUND))))
+            trump2)))
 
+;animation trump on-tick
 (define (tick p)
     (define v (State-anim p))
         (if (= v 3) (struct-copy State p (anim 0)) 
@@ -63,14 +66,14 @@
     (define torender (list 
       (text (string-append (number->string money)"$") 40 "black") 
       (draw_trump state)))
-    (place-images torender (list (make-posn 683 100) (make-posn 683 400)) BACKGROUND))
+    (place-images torender (list (make-posn 683 95) (make-posn 683 475)) BACKGROUND))
 
 ;on-click money
 ; State Number Number String -> State
 (define (mouse-input state mouse-x mouse-y mouse-event)
     (match-define (State money anim) state)
     (if (equal? mouse-event "button-down")
-    (if (overlaps mouse-x mouse-y 1 1 610 310 125 185)
+    (if (overlaps mouse-x mouse-y 1 1 520 235 280 420)
           (begin 
             (savegame (+ money 1)) 
             (struct-copy State state (money (+ money 1))))
