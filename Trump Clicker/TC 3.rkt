@@ -4,7 +4,6 @@
 (require 2htdp/universe)
 (require lang/posn)
 (require 2htdp/batch-io)
-(require "rectcontains.rkt")
 
 (struct State (money anim) #:transparent)
 
@@ -15,7 +14,7 @@
 
 ;defines
 (define start-counter (string->number (read-file "Kapital")))
-(define BACKGROUND (empty-scene 1366 768))
+(define BACKGROUND (bitmap "background.png"))
 (define (savegame p) (write-file "Kapital" (number->string p)))
 
 (define trump1 (bitmap "trump1.png"))
@@ -23,7 +22,11 @@
 (define trump3 (bitmap "trump3.png"))
 (define posns (list (make-posn 683 400)))
 
-;define Hitbox
+;close game
+(define (handle-keys state key)
+    (if (key=? key "escape") (exit) state))
+
+;define hitbox
 (define (overlaps ax ay aw ah bx by bw bh)
   (define al ax)
   (define ar (+ ax aw))
@@ -78,4 +81,6 @@
 (big-bang (State start-counter 0)
     (to-draw draw_ampel)
     (on-mouse mouse-input)
-    (on-tick tick)) 
+    (on-tick tick)
+    (on-key handle-keys)
+    (display-mode 'fullscreen)) 
