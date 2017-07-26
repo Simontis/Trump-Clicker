@@ -24,6 +24,10 @@
 (define trump3 (bitmap "trump3.png"))
 (define posns (list (make-posn 683 400)))
 
+;define shop buttons
+(define mexikaner-button (bitmap "mexikaner-button.png"))
+(define muslim-button (bitmap "muslim-button.png"))
+
 ;close game
 (define (handle-keys state key)
     (if (key=? key "escape") (exit) state))
@@ -39,6 +43,29 @@
   (define bt by)
   (define bb (+ bt bh))
   (and (> br al) (< bl ar) (> bb at) (< bt ab)))
+
+  (define (overlaps-mex ax ay aw ah cx cy cw ch)
+  (define al ax)
+  (define ar (+ ax aw))
+  (define at ay)
+  (define ab (+ at ah))
+  (define bl cx)
+  (define br (+ cx cw))
+  (define bt cy)
+  (define bb (+ bt ch))
+  (and (> br al) (< bl ar) (> bb at) (< bt ab)))
+
+  (define (overlaps-mos ax ay aw ah dx dy dw dh)
+  (define al ax)
+  (define ar (+ ax aw))
+  (define at ay)
+  (define ab (+ at ah))
+  (define bl dx)
+  (define br (+ dx dw))
+  (define bt dy)
+  (define bb (+ bt dh))
+  (and (> br al) (< bl ar) (> bb at) (< bt ab)))
+
 
 ;define draw trump
 (define (draw_trump p)
@@ -65,8 +92,18 @@
     (match-define (State money anim) state)
     (define torender (list 
       (text (string-append (number->string money)"$") 40 "black") 
-      (draw_trump state)))
-    (place-images torender (list (make-posn 683 95) (make-posn 683 475)) BACKGROUND))
+            (draw_trump state)
+            (text "100$" 15 "black")
+            (text "100$" 15 "black")                                      
+            mexikaner-button
+            muslim-button))
+    (place-images torender (list 
+            (make-posn 683 95) 
+            (make-posn 683 475)
+            (make-posn 341.5 470)
+            (make-posn 1024.5 485) 
+            (make-posn 341.5 420) 
+            (make-posn 1024.5 420)) BACKGROUND))
 
 ;on-click money
 ; State Number Number String -> State
