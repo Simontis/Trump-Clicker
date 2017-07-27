@@ -116,15 +116,17 @@
             (savegame (+ money 1)) 
             (struct-copy State state (money (+ money 1)))))
 
-          ((overlaps-mex mouse-x mouse-y 1 1 229 307 225 225)
+          ((overlaps-mex mouse-x mouse-y 1 1 229 307 225 225)          
+          (if (>= money 100)
           (begin
             (savegame (- money 100))
-            (struct-copy State state (money (- money 100)))))
+            (struct-copy State state (money (- money 100))))state))
 
-          ((overlaps-mos mouse-x mouse-y 1 1 912 307 225 225)
+          ((overlaps-mos mouse-x mouse-y 1 1 912 307 225 225)         
+          (if (>= money 100)
           (begin
             (savegame (- money 100))
-            (struct-copy State state (money (- money 100)))))
+            (struct-copy State state (money (- money 100))))state))
 
           (money state))state))
     
