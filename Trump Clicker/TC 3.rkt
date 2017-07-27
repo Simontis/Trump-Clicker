@@ -110,11 +110,23 @@
 (define (mouse-input state mouse-x mouse-y mouse-event)
     (match-define (State money anim) state)
     (if (equal? mouse-event "button-down")
-    (if (overlaps mouse-x mouse-y 1 1 520 235 280 420)
+
+    (cond ((overlaps mouse-x mouse-y 1 1 520 235 280 420)
           (begin 
             (savegame (+ money 1)) 
-            (struct-copy State state (money (+ money 1))))
-          state)state))
+            (struct-copy State state (money (+ money 1)))))
+
+          ((overlaps-mex mouse-x mouse-y 1 1 229 307 225 225)
+          (begin
+            (savegame (- money 100))
+            (struct-copy State state (money (- money 100)))))
+
+          ((overlaps-mos mouse-x mouse-y 1 1 912 307 225 225)
+          (begin
+            (savegame (- money 100))
+            (struct-copy State state (money (- money 100)))))
+
+          (money state))state))
     
 
 ;Output
