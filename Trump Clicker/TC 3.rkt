@@ -5,7 +5,7 @@
 (require lang/posn)
 (require 2htdp/batch-io)
 
-(struct State (money anim) #:transparent)
+(struct State (money anim costs-mex costs-mos) #:transparent)
 
 ;generate file
 (define file-exists (file-exists? "Kapital"))
@@ -13,10 +13,24 @@
         (write-file "Kapital" "0")
         (read-file "Kapital"))
 
+(define file-exists-costs-mex (file-exists? "costs-mex"))
+(when (not file-exists-costs-mex)
+        (write-file "costs-mex" "100"))
+
+(define file-exists-costs-mos (file-exists? "costs-mos"))
+(when (not file-exists-costs-mos)
+        (write-file "costs-mos" "100"))
+
 ;defines
 (define start-counter (string->number (read-file "Kapital")))
 (define BACKGROUND (bitmap "background.png"))
 (define (savegame p) (write-file "Kapital" (number->string p)))
+
+(define costs-mex (string->number (read-file "costs-mex")))
+(define (save-costs-mex p) (write-file "costs-mex" (number->string p)))
+
+(define costs-mos (string->number (read-file "costs-mos")))
+(define (save-costs-mos p) (write-file "costs-mos" (number->string p)))
 
 ;define trump animation
 (define trump1 (bitmap "trump1.png"))
@@ -89,12 +103,12 @@
 ;layout
 ; State -> Image
 (define (draw_ampel state)
-    (match-define (State money anim) state)
+    (match-define (State money anim costs-mex costs-mos) state)
     (define torender (list 
       (text (string-append (number->string money)"$") 40 "black") 
             (draw_trump state)
-            (text "100$" 15 "black")
-            (text "100$" 15 "black")                                      
+            (text (string-append (number->string costs-mex)"$") 15 "black")
+            (text (string-append (number->string costs-mos)"$") 15 "black")                                     
             mexikaner-button
             muslim-button))
     (place-images torender (list 
@@ -108,7 +122,7 @@
 ;on-click money
 ; State Number Number String -> State
 (define (mouse-input state mouse-x mouse-y mouse-event)
-    (match-define (State money anim) state)
+    (match-define (State money anim costs-mex costs-mos) state)
     (if (equal? mouse-event "button-down")
 
     (cond ((overlaps mouse-x mouse-y 1 1 520 235 280 420)
@@ -117,22 +131,25 @@
             (struct-copy State state (money (+ money 1)))))
 
           ((overlaps-mex mouse-x mouse-y 1 1 229 307 225 225)          
-          (if (>= money 100)
+          (if (>= money costs-mex)
           (begin
-            (savegame (- money 100))
-            (struct-copy State state (money (- money 100))))state))
+            (savegame (- money costs-mex))(save-costs-mex (* costs-mex 2))
+            (struct-copy State state (money (- money costs-mex))(costs-mex (* costs-mex 2)))
+            )state))
 
           ((overlaps-mos mouse-x mouse-y 1 1 912 307 225 225)         
-          (if (>= money 100)
+          (if (>= money costs-mos)
           (begin
-            (savegame (- money 100))
-            (struct-copy State state (money (- money 100))))state))
+            (savegame (- money costs-mos))(save-costs-mos (* costs-mos 2))
+            (struct-copy State state (money (- money costs-mos))(costs-mos (* costs-mos 2)))
+            )state))
 
           (money state))state))
     
+; (struct State (money anim costs-mex costs-mos) #:transparent)
 
 ;Output
-(big-bang (State start-counter 0)
+(big-bang (State  start-counter 0 costs-mex costs-mos)
     (to-draw draw_ampel)
     (on-mouse mouse-input)
     (on-tick tick)
