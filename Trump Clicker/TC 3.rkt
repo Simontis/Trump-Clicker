@@ -5,7 +5,7 @@
 (require lang/posn)
 (require 2htdp/batch-io)
 
-(struct State (money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp time) #:transparent)
+(struct State (money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp amount-john-cena costs-john-cena amount-fist-up costs-fist-up time) #:transparent)
 
 ;generate file
 (define file-exists (file-exists? "Kapital"))
@@ -36,6 +36,22 @@
 (when (not file-exists-amount-mos)
         (write-file "amount-mos" "0"))
 
+(define file-exists-john-cena (file-exists? "amount-john-cena"))
+(when (not file-exists-john-cena)
+        (write-file "amount-john-cena" "0"))
+
+(define file-exists-fist-up (file-exists? "amount-fist-up"))
+(when (not file-exists-fist-up)
+        (write-file "amount-fist-up" "1"))
+
+(define file-exists-costs-john-cena (file-exists? "costs-john-cena"))
+(when (not file-exists-costs-john-cena)
+        (write-file "costs-john-cena" "10000"))
+
+(define file-exists-costs-fist-up (file-exists? "costs-fist-up"))
+(when (not file-exists-costs-fist-up)
+        (write-file "costs-fist-up" "100"))
+
 ;defines
 (define start-counter (string->number (read-file "Kapital")))
 (define BACKGROUND (bitmap "background.png"))
@@ -46,6 +62,12 @@
 
 (define costs-PowerUp (string->number (read-file "costs-PowerUp")))
 (define (save-costs-PowerUp p) (write-file "costs-PowerUp" (number->string p)))
+
+(define costs-john-cena (string->number (read-file "costs-john-cena")))
+(define (save-costs-john-cena p) (write-file "costs-john-cena" (number->string p)))
+
+(define costs-fist-up (string->number (read-file "costs-fist-up")))
+(define (save-costs-fist-up p) (write-file "costs-fist-up" (number->string p)))
 
 (define costs-mex (string->number (read-file "costs-mex")))
 (define (save-costs-mex p) (write-file "costs-mex" (number->string p)))
@@ -59,6 +81,12 @@
 (define amount-mos (string->number (read-file "amount-mos")))
 (define (save-amount-mos p) (write-file "amount-mos" (number->string p)))
 
+(define amount-fist-up (string->number (read-file "amount-fist-up")))
+(define (save-amount-fist-up p) (write-file "amount-fist-up" (number->string p)))
+
+(define amount-john-cena (string->number (read-file "amount-john-cena")))
+(define (save-amount-john-cena p) (write-file "amount-john-cena" (number->string p)))
+
 ;define trump animation
 (define trump1 (bitmap "trump1.png"))
 (define trump2 (bitmap "trump2.png"))
@@ -70,7 +98,7 @@
 (define muslim-button (bitmap "muslim-button.png"))
 (define PowerUp (bitmap "PowerUp.png"))
 (define fist-up (bitmap "godfist.png"))
-(define john-cena-button (bitmap "john-cena-button.png"))
+(define john-cena (bitmap "john-cena-button.png"))
 
 ;close game
 (define (handle-keys state key)
@@ -121,6 +149,17 @@
   (define bb (+ bt eh))
   (and (> br al) (< bl ar) (> bb at) (< bt ab)))
 
+  (define (overlaps-john-cena ax ay aw ah fx fy fw fh)
+  (define al ax)
+  (define ar (+ ax aw))
+  (define at ay)
+  (define ab (+ at ah))
+  (define bl fx)
+  (define br (+ fx fw))
+  (define bt fy)
+  (define bb (+ bt fh))
+  (and (> br al) (< bl ar) (> bb at) (< bt ab)))
+
 
 ;define draw trump
 (define (draw_trump p)
@@ -142,7 +181,7 @@
     (define now (current-milliseconds))
     (define money (State-money state))
     (define update-money? (> (- now time) 900))
-    (define money-delta (* (State-amount-PowerUp state)(+ (State-amount-mos state) (State-amount-mex state))))
+    (define money-delta (* (State-amount-PowerUp state)(+ (State-amount-john-cena state)(+ (State-amount-mos state) (State-amount-mex state)))))
     (define money-new (if update-money? (+ money money-delta) money))
     (define time-new (if update-money? now time))
     (define anim-new (modulo (+ anim 1) 4))
@@ -152,24 +191,32 @@
 ;layout
 ; State -> Image
 (define (draw_ampel state)
-    (match-define (State money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp time) state)
+    (match-define (State money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp amount-john-cena costs-john-cena amount-fist-up costs-fist-up time) state)
     (define torender (list 
       (text/font (string-append (number->string money)"$") 40 "black" #f 'swiss 'normal 'bold #f) 
       (text/font (string-append (number->string costs-PowerUp)"$" "  " (number->string amount-PowerUp)"x") 25 "black" #f 'swiss 'normal 'bold #f)
+      (text/font (string-append (number->string costs-john-cena)"$" "  " (number->string (* 0.01 amount-john-cena))"x") 15 "black" #f 'swiss 'normal 'bold #f)
+      (text/font (string-append (number->string costs-fist-up)"$" "  " (number->string amount-fist-up)"x") 25 "black" #f 'swiss 'normal 'bold #f)      
+            fist-up
             PowerUp
             (draw_trump state)
             (text/font (string-append (number->string costs-mex)"$" "  "(number->string amount-mex)"x") 15 "black" #f 'swiss 'normal 'bold #f)
             (text/font (string-append (number->string costs-mos)"$" "  "(number->string amount-mos)"x") 15 "black" #f 'swiss 'normal 'bold #f)                                    
+            john-cena
             mexikaner-button
             muslim-button
             ))
     (place-images torender (list 
             (make-posn 683 95)
             (make-posn 240 655)
+            (make-posn 1250 530)
+            (make-posn 240 425)
+            (make-posn 240 350)
             (make-posn 250 580) 
             (make-posn 683 440)
             (make-posn 1024 650)
             (make-posn 1024 400) 
+            (make-posn 1250 465);cena
             (make-posn 1024 600) 
             (make-posn 1024 335)
             ) BACKGROUND))
@@ -177,11 +224,12 @@
 ;on-click money
 ; State Number Number String -> State
 (define (mouse-input state mouse-x mouse-y mouse-event)
-    (match-define (State money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp time) state)
+    (match-define (State money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp amount-john-cena costs-john-cena amount-fist-up costs-fist-up time) state)
     (define overlap-trump? (overlaps mouse-x mouse-y 1 1 520 200 280 420))
     (define overlap-mex? (overlaps-mex mouse-x mouse-y 1 1 912 487 225 225))
     (define overlap-mos? (overlaps-mos mouse-x mouse-y 1 1 912 222 225 225))
     (define overlap-PowerUp? (overlaps-PowerUp mouse-x mouse-y 1 1 128 543 400 225))
+    (define overlap-john-cena? (overlaps-john-cena mouse-x mouse-y 1 1 1138 418 225 225))
     
     (define button-down? (equal? mouse-event "button-down"))
 
@@ -222,15 +270,26 @@
                     (save-amount-PowerUp (+ amount-PowerUp 1))
                     (struct-copy State state (costs-PowerUp (* costs-PowerUp 2))
                                              (amount-PowerUp (+ amount-PowerUp 1))
-                                             (money (- money costs-PowerUp))
+                                             (money (- money costs-PowerUp))))
+                state))
+
+          (overlap-john-cena?         
+            (if (>= money costs-john-cena)
+                (begin
+                    (savegame (- money costs-john-cena))
+                    (save-costs-john-cena (* costs-john-cena 2))
+                    (save-amount-john-cena (+ amount-john-cena 1))
+                    (struct-copy State state (costs-john-cena (* costs-john-cena 3))
+                                             (amount-john-cena (+ amount-john-cena 100))
+                                             (money (- money costs-john-cena))
                 ))
                 state))
           (else state))))
     
-; (struct State (money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp time) #:transparent)
+; (struct State (money anim costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp amount-john-cena costs-john-cena amount-fist-up costs-fist-up time) #:transparent)
 
 ;Output
-(big-bang (State  start-counter 0 costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp (current-milliseconds))
+(big-bang (State  start-counter 0 costs-mex costs-mos amount-mex amount-mos amount-PowerUp costs-PowerUp amount-john-cena costs-john-cena amount-fist-up costs-fist-up (current-milliseconds))
     (to-draw draw_ampel)
     (on-mouse mouse-input)
     (on-tick tick 0.1)
